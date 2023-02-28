@@ -1,4 +1,4 @@
-# kiji-dasu Backend
+# V3
 ## SET UP
 1. docker-compose build
 2. docker-compose up -d
@@ -10,5 +10,9 @@
 ## CONFIG
 - Open file hosts and add "127.0.0.1 admin.retailstudiov3.test" into it.
 
-## access on broweser 
-http://admin.retailstudiov3.test:8082
+## access on Browser  
+- http://admin.retailstudiov3.test:8082
+
+## Database
+- use your local  database for this project
+- dump your local databae and import to the database 
