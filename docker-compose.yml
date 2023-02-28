@@ -1,0 +1,63 @@
+version: "3"
+services:
+
+  mysql:
+    build: ./docker/db
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    ports:
+      - 63306:3306
+#    user: "1000:50"                      # Perhaps, impact of docker version or os
+#    command: --innodb-use-native-aio=0   # ref. https://www.bountysource.com/issues/53979310-mysql-container-working-on-docker-v17-12-0-but-not-on-v18-01-0
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql
+    container_name: "rs_v3_mysql"
+
+  redis:
+    image: redis:latest
+    volumes:
+      - ./data/redis:/data
+    ports:
+      - 6378:6379
+    command: redis-server --appendonly yes
+    container_name: "rs_v3_redis"
+
+  php:
+    build: ./docker/app
+    links:
+      - mysql
+      - redis
+    volumes:
+      - ./src:/var/data
+      - ./data/logs/php:/var/log/php-fpm
+    working_dir: /var/data/retailstudio_app
+    container_name: "rs_v3_php"
+
+  nginx:
+    build: ./docker/web
+    ports:
+      # - "80:80"
+      - "8082:8082"
+      - "443:443"
+    links:
+      - php
+    volumes:
+      - ./docker/web/conf/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/web/conf/rs_vhost.conf:/etc/nginx/conf.d/rs_vhost.conf
+      - ./src:/var/data
+      - ./data/logs/nginx:/var/log/nginx
+    container_name: "rs_v3_nginx"
+
+  nodejs:
+    image: node:11
+    container_name: "rs_v3_nodejs"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./src:/var/data:cached
+    working_dir: /var/data/retailstudio_app
+    expose:
+      - "8082"
+    tty: true
+
+
