@@ -47,12 +47,18 @@ class AbstractApiController extends Controller
     ): JsonResponse {
         $request = request();
         $paginate = $query->paginate(
-            toInt($request->get('limit', config('cmmr.paginate_limit')))
+            $this->toInt($request->get('limit', 30))
         );
         $paginate->appends($request->query->all());
         return (new PaginateCollection($paginate))->toResponse($request);
     }
-
+    function toInt(mixed $value): ?int
+    {
+        if (is_null($value)) {
+            return null;
+        }
+        return intval($value);
+    }
     /**
      * preprocessing()をオーバーライドして利用してください。
      *
